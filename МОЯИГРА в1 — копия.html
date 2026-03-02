@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Flower Catch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #87CEFA 0%, #FFB6C1 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+            overflow: hidden;
+        }
+        
+        .game-header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 0 15px;
+        }
+        
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #e74c3c;
+            white-space: nowrap;
+        }
+        
+        .logo-icon {
+            font-size: 45px;
+        }
+        
+        .status-bar-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .status-bar {
+            background: white;
+            border-radius: 30px;
+            padding: 14px 30px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            align-items: center;
+            white-space: nowrap;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 19px;
+            color: #555;
+            min-width: 130px;
+            justify-content: center;
+        }
+        
+        .status-value {
+            font-weight: bold;
+            color: #e74c3c;
+            min-width: 45px;
+            text-align: center;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            background: transparent;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        canvas {
+            display: block;
+            background: #87CEEB;
+        }
+        
+        .basket {
+            position: absolute;
+            bottom: 20px;
+            width: 140px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 5;
+            font-size: 80px;
+            transform: translateX(-50%);
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+            pointer-events: none;
+        }
+        
+        .instructions-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            padding: 20px;
+            border-radius: 20px;
+        }
+        
+        .instructions-title {
+            font-size: 48px;
+            color: #e74c3c;
+            margin-bottom: 30px;
+            text-align: center;
+            white-space: nowrap;
+            padding: 0 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .instructions-content {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 35px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .instructions-content h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        .instructions-content ul {
+            text-align: left;
+            padding-left: 25px;
+            margin: 15px 0;
+        }
+        
+        .instructions-content li {
+            margin-bottom: 10px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        
+        .instructions-content li:before {
+            content: "•";
+            color: #e74c3c;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        
+        .instructions-tip {
+            background: #e8f4fc;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 15px;
+            color: #555;
+            border-left: 4px solid #3498db;
+            line-height: 1.4;
+        }
+        
+        .btn {
+            background: linear-gradient(to bottom, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 22px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            margin: 10px;
+            box-shadow: 0 6px 0 #1d6fa5;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to bottom, #2980b9 0%, #1d6fa5 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #155a7d;
+        }
+        
+        .btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #155a7d;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to bottom, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 6px 0 #c0392b;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, #c0392b 0%, #a93226 100%);
+            box-shadow: 0 8px 0 #a93226;
+        }
+        
+        #quiz-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            display: none;
+        }
+        
+        .modal-content {
+            background: linear-gradient(120deg, #ff9a9e 0%, #fad0c4 100%);
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            border: 8px solid #fff;
+        }
+        
+        #quiz-question {
+            font-size: 36px;
+            margin-bottom: 30px;
+            min-height: 80px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .quiz-option {
+            background: linear-gradient(to bottom, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            margin: 12px;
+            font-size: 26px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 280px;
+            font-weight: bold;
+            box-shadow: 0 6px 0 #1b5e20;
+        }
+        
+        .quiz-option:hover {
+            background: linear-gradient(to bottom, #45a049 0%, #1b5e20 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #0d3d16;
+        }
+        
+        .quiz-option:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0d3d16;
+        }
+        
+        .quiz-option.wrong {
+            background: linear-gradient(to bottom, #e53935 0%, #c62828 100%);
+            box-shadow: 0 6px 0 #b71c1c;
+        }
+        
+        .quiz-option.correct {
+            background: linear-gradient(to bottom, #2e7d32 0%, #1b5e20 100%);
+            box-shadow: 0 6px 0 #0d3d16;
+        }
+        
+        #win-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            border-radius: 20px;
+            display: none;
+            overflow: hidden;
+        }
+        
+        #win-modal h2 {
+            font-size: 72px;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #fff, 0 0 30px #ffd700;
+            z-index: 10;
+            font-weight: bold;
+            letter-spacing: 3px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        #fireworks-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 15px 5px;
+            animation: explode 1.5s ease-out forwards;
+        }
+        
+        @keyframes explode {
+            0% {
+                transform: scale(0.2) translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+        
+        #restart-button {
+            background: linear-gradient(to bottom, #ffd700 0%, #ff9800 100%);
+            color: #8b4513;
+            border: none;
+            padding: 25px 60px;
+            font-size: 36px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 10px 0 #e68a00;
+            z-index: 10;
+        }
+        
+        #restart-button:hover {
+            background: linear-gradient(to bottom, #ffcc00 0%, #f57c00 100%);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 0 #cc6600;
+        }
+        
+        #restart-button:active {
+            transform: translateY(7px);
+            box-shadow: 0 4px 0 #cc6600;
+        }
+        
+        #game-over-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            border-radius: 20px;
+            display: none;
+        }
+        
+        #game-over-modal h2 {
+            font-size: 64px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.7);
+        }
+        
+        #game-over-modal p {
+            font-size: 36px;
+            margin-bottom: 40px;
+            color: #f1c40f;
+        }
+        
+        #restart-button-gameover {
+            background: linear-gradient(to bottom, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 32px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 8px 0 #1d6fa5;
+        }
+        
+        #restart-button-gameover:hover {
+            background: linear-gradient(to bottom, #2980b9 0%, #1d6fa5 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 0 #155a7d;
+        }
+        
+        #restart-button-gameover:active {
+            transform: translateY(5px);
+            box-shadow: 0 3px 0 #155a7d;
+        }
+        
+        .game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 5;
+        }
+        
+        .game-screen.active {
+            display: block;
+        }
+        
+        @media (max-width: 950px) {
+            .game-header {
+                margin-bottom: 20px;
+            }
+            
+            .status-bar {
+                flex-wrap: wrap;
+                gap: 15px;
+                padding: 12px 20px;
+            }
+            
+            .status-item {
+                min-width: auto;
+                font-size: 17px;
+            }
+            
+            #game-container {
+                width: 100%;
+                max-width: 900px;
+                height: 600px;
+            }
+            
+            .logo {
+                font-size: 28px;
+            }
+            
+            .logo-icon {
+                font-size: 38px;
+            }
+            
+            .instructions-title {
+                font-size: 38px;
+                padding: 0 10px;
+            }
+        }
+        
+        @media (max-width: 650px) {
+            #game-container {
+                height: 500px;
+            }
+            
+            .instructions-content {
+                padding: 25px;
+                max-width: 95%;
+            }
+            
+            .instructions-content h2 {
+                font-size: 20px;
+            }
+            
+            .instructions-content li {
+                font-size: 16px;
+            }
+            
+            .instructions-tip {
+                font-size: 14px;
+                padding: 10px;
+            }
+            
+            .btn {
+                font-size: 18px;
+                padding: 12px 30px;
+            }
+            
+            .basket {
+                width: 100px;
+                height: 70px;
+                font-size: 60px;
+                bottom: 15px;
+            }
+            
+            .status-bar {
+                padding: 10px 15px;
+                gap: 12px;
+            }
+            
+            .status-item {
+                font-size: 16px;
+                gap: 5px;
+            }
+            
+            .instructions-title {
+                font-size: 32px;
+                padding: 0 5px;
+            }
+            
+            .game-header {
+                padding: 0 10px;
+            }
+        }
+        
+        /* Ground hit explosion effect */
+        .ground-hit {
+            position: absolute;
+            pointer-events: none;
+            z-index: 4;
+            animation: groundBurst 0.8s ease-out forwards;
+            font-size: 50px;
+            text-shadow: 0 0 10px #ff4444;
+        }
+        
+        @keyframes groundBurst {
+            0% {
+                transform: scale(0.3) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+                opacity: 0.9;
+            }
+            100% {
+                transform: scale(1.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <div class="logo-container">
+            <div class="logo">
+                <span class="logo-icon">🌼</span>
+                <span>Spring Flower Catch</span>
+            </div>
+        </div>
+        <div class="status-bar-container">
+            <div class="status-bar">
+                <div class="status-item">
+                    <span>Score:</span>
+                    <span id="score-value" class="status-value">0</span>
+                </div>
+                <div class="status-item">
+                    <span>Misses:</span>
+                    <span id="misses-value" class="status-value">0 / 3</span>
+                </div>
+                <div class="status-item">
+                    <span>Next quiz at:</span>
+                    <span id="next-quiz-value" class="status-value">5</span>
+                </div>
+                <div class="status-item">
+                    <button id="new-game-btn" class="btn btn-primary">New Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="game-container">
+        <canvas id="game-canvas" width="900" height="600"></canvas>
+        <div class="basket" id="basket">🧺</div>
+        
+        <div class="game-screen active" id="instructions-screen">
+            <div class="instructions-screen">
+                <h2 class="instructions-title">How to Play 🌼</h2>
+                <div class="instructions-content">
+                    <h2>Catch the falling flowers with your basket! Move your mouse to catch flowers.</h2>
+                    <ul>
+                        <li>+ 1 point per flower. 3 misses = game over.</li>
+                        <li>Grammar quiz appears at 5, 10, 15... points.</li>
+                        <li>Answer correctly to continue; wrong answer = -5 points.</li>
+                        <li>Reach 50 points to win! 🎉</li>
+                    </ul>
+                    <div class="instructions-tip">
+                        Tip: This game focuses on Present Continuous tense for 3rd grade English learners.
+                    </div>
+                    <div style="margin-top: 25px;">
+                        <button id="start-game-btn" class="btn btn-primary">Start Game</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-screen" id="game-screen">
+            <div id="quiz-modal">
+                <div class="modal-content">
+                    <p id="quiz-question">Question appears here</p>
+                    <button class="quiz-option" id="option0">Option 1</button>
+                    <button class="quiz-option" id="option1">Option 2</button>
+                </div>
+            </div>
+            
+            <div id="win-modal">
+                <h2>🎉 CONGRATULATIONS! 🎉<br>You Won the Game!</h2>
+                <div id="fireworks-container"></div>
+                <button id="restart-button">Play Again</button>
+            </div>
+            
+            <div id="game-over-modal">
+                <h2>GAME OVER</h2>
+                <p>Try again to catch more flowers!</p>
+                <button id="restart-button-gameover">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ========================================
+    // 🌺 ASSETS SECTION - REPLACE IMAGES HERE
+    // ========================================
+    const flowerImageUrls = [
+        "https://i.postimg.cc/7Cv7gqCj/rose.png",        // 🌹 rose
+        "https://i.postimg.cc/gw9RvGwf/sunflower.png",   // 🌻 sunflower
+        "https://i.postimg.cc/cvtwgvJp/daffodil.png",    // 🌸 daffodil
+        "https://i.postimg.cc/gw9RvGX0/tulip.png",       // 🌷 tulip
+        "https://i.postimg.cc/rd6WSqdB/daisy.png",       // 🌼 daisy
+        "https://i.postimg.cc/v4xfg4BY/poppy.png"        // 🌺 poppy
+    ];
+    
+    // Flower emojis (fallback if images fail to load)
+    const flowerEmojis = ['🌹', '🌻', '🌼', '🌷', '🌼', '🌺'];
+    
+    // ========================================
+    // 📚 QUIZZES - Present Continuous (20) - 3rd Grade Level
+    // ========================================
+    const quizzes = [
+        {
+            question: "Look! The children _____ in the garden.",
+            options: ["is playing", "are playing"],
+            correctAnswer: "are playing"
+        },
+        {
+            question: "I _____ my homework right now.",
+            options: ["am doing", "is doing"],
+            correctAnswer: "am doing"
+        },
+        {
+            question: "She _____ a book at this moment.",
+            options: ["is reading", "are reading"],
+            correctAnswer: "is reading"
+        },
+        {
+            question: "They _____ football in the park now.",
+            options: ["is playing", "are playing"],
+            correctAnswer: "are playing"
+        },
+        {
+            question: "What _____ you _____ right now?",
+            options: ["are / doing", "is / doing"],
+            correctAnswer: "are / doing"
+        },
+        {
+            question: "He _____ dinner at the moment.",
+            options: ["is cooking", "are cooking"],
+            correctAnswer: "is cooking"
+        },
+        {
+            question: "We _____ to music right now.",
+            options: ["is listening", "are listening"],
+            correctAnswer: "are listening"
+        },
+        {
+            question: "The dog _____ in the garden.",
+            options: ["is sleeping", "are sleeping"],
+            correctAnswer: "is sleeping"
+        },
+        {
+            question: "I _____ for the bus at this moment.",
+            options: ["am waiting", "is waiting"],
+            correctAnswer: "am waiting"
+        },
+        {
+            question: "She _____ her hair now.",
+            options: ["is washing", "are washing"],
+            correctAnswer: "is washing"
+        },
+        {
+            question: "They _____ TV at the moment.",
+            options: ["is watching", "are watching"],
+            correctAnswer: "are watching"
+        },
+        {
+            question: "What _____ he _____ now?",
+            options: ["is / doing", "are / doing"],
+            correctAnswer: "is / doing"
+        },
+        {
+            question: "I _____ to school right now.",
+            options: ["am going", "is going"],
+            correctAnswer: "am going"
+        },
+        {
+            question: "The birds _____ in the sky.",
+            options: ["is flying", "are flying"],
+            correctAnswer: "are flying"
+        },
+        {
+            question: "She _____ a letter at this moment.",
+            options: ["is writing", "are writing"],
+            correctAnswer: "is writing"
+        },
+        {
+            question: "We _____ a movie right now.",
+            options: ["is watching", "are watching"],
+            correctAnswer: "are watching"
+        },
+        {
+            question: "He _____ his car at the moment.",
+            options: ["is washing", "are washing"],
+            correctAnswer: "is washing"
+        },
+        {
+            question: "They _____ lunch now.",
+            options: ["is having", "are having"],
+            correctAnswer: "are having"
+        },
+        {
+            question: "I _____ my room right now.",
+            options: ["am cleaning", "is cleaning"],
+            correctAnswer: "am cleaning"
+        },
+        {
+            question: "The baby _____ now.",
+            options: ["is crying", "are crying"],
+            correctAnswer: "is crying"
+        }
+    ];
+
+    // ========================================
+    // 🎮 GAME VARIABLES
+    // ========================================
+    let canvas, ctx;
+    let score = 0;
+    let misses = 0;
+    let flowers = [];
+    let basket = { x: 450, width: 140, height: 100 };
+    let gameActive = false;
+    let isPaused = false;
+    let lastSpawnTime = 0;
+    let spawnInterval = 2500; // 2.5 seconds between flowers
+    let flowerSpeed = 2.3; // Increased speed
+    let basketSpeed = 15; // smooth movement
+    let currentQuizIndex = 0;
+    let winCelebrationActive = false;
+    let basketElement;
+    let scoreDisplay;
+    let missesDisplay;
+    let nextQuizDisplay;
+    let quizModal;
+    let winModal;
+    let gameOverModal;
+    let fireworksContainer;
+    let quizQuestionElement;
+    let optionButtons;
+    let restartButtons;
+    let instructionsScreen;
+    let gameScreen;
+    let gameContainer;
+    let flowerImages = []; // Array to store loaded images
+    
+    // ========================================
+    // 🖼️ LOAD FLOWER IMAGES
+    // ========================================
+    function loadFlowerImages() {
+        let loadedCount = 0;
+        const totalCount = flowerImageUrls.length;
+        
+        flowerImageUrls.forEach((url, index) => {
+            if (!url || url.trim() === "") {
+                // No URL provided - use emoji fallback
+                flowerImages[index] = null;
+                loadedCount++;
+                checkAllLoaded(loadedCount, totalCount);
+                return;
+            }
+            
+            const img = new Image();
+            img.onload = () => {
+                flowerImages[index] = img;
+                loadedCount++;
+                checkAllLoaded(loadedCount, totalCount);
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load image: ${url}. Using emoji fallback.`);
+                flowerImages[index] = null; // Use emoji if image fails to load
+                loadedCount++;
+                checkAllLoaded(loadedCount, totalCount);
+            };
+            img.src = url;
+        });
+        
+        // If no images to load, start immediately
+        if (totalCount === 0) {
+            startGameAfterLoad();
+        }
+    }
+    
+    function checkAllLoaded(loadedCount, totalCount) {
+        if (loadedCount === totalCount) {
+            startGameAfterLoad();
+        }
+    }
+    
+    function startGameAfterLoad() {
+        // Game is ready to start with images loaded (or fallback to emojis)
+        console.log("Flower images loaded. Game ready to start.");
+    }
+
+    // ========================================
+    // 🚀 INITIALIZE GAME
+    // ========================================
+    window.addEventListener('DOMContentLoaded', () => {
+        // Get DOM elements
+        canvas = document.getElementById('game-canvas');
+        ctx = canvas.getContext('2d');
+        basketElement = document.getElementById('basket');
+        scoreDisplay = document.getElementById('score-value');
+        missesDisplay = document.getElementById('misses-value');
+        nextQuizDisplay = document.getElementById('next-quiz-value');
+        quizModal = document.getElementById('quiz-modal');
+        winModal = document.getElementById('win-modal');
+        gameOverModal = document.getElementById('game-over-modal');
+        fireworksContainer = document.getElementById('fireworks-container');
+        quizQuestionElement = document.getElementById('quiz-question');
+        optionButtons = [
+            document.getElementById('option0'),
+            document.getElementById('option1')
+        ];
+        restartButtons = [
+            document.getElementById('restart-button'),
+            document.getElementById('restart-button-gameover')
+        ];
+        instructionsScreen = document.getElementById('instructions-screen');
+        gameScreen = document.getElementById('game-screen');
+        gameContainer = document.getElementById('game-container');
+        
+        // Load flower images first
+        loadFlowerImages();
+        
+        // Set up event listeners for quiz options
+        optionButtons.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                handleQuizAnswer(index);
+            });
+        });
+        
+        // Set up event listeners for restart buttons
+        restartButtons.forEach(button => {
+            button.addEventListener('click', restartGame);
+        });
+        
+        // Set up event listeners for game controls
+        document.getElementById('start-game-btn').addEventListener('click', startGame);
+        document.getElementById('new-game-btn').addEventListener('click', restartGame);
+        
+        // Set up mouse controls
+        document.addEventListener('mousemove', (e) => {
+            if (!gameActive || isPaused) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            basket.x = Math.max(basket.width/2, Math.min(canvas.width - basket.width/2, mouseX));
+        });
+        
+        // Start the game loop
+        gameLoop();
+    });
+    
+    // ========================================
+    // 🎯 START GAME
+    // ========================================
+    function startGame() {
+        // Hide instructions screen
+        instructionsScreen.classList.remove('active');
+        gameScreen.classList.add('active');
+        
+        // Reset game state
+        score = 0;
+        misses = 0;
+        flowers = [];
+        gameActive = true;
+        isPaused = false;
+        winCelebrationActive = false;
+        currentQuizIndex = 0;
+        updateScoreDisplay();
+        updateMissesDisplay();
+        updateNextQuizDisplay();
+        
+        // Reset basket position
+        basket.x = canvas.width / 2;
+        basketElement.style.left = `${basket.x}px`;
+        
+        // Hide modals
+        quizModal.style.display = 'none';
+        winModal.style.display = 'none';
+        gameOverModal.style.display = 'none';
+        
+        // Start spawning flowers
+        lastSpawnTime = Date.now();
+    }
+    
+    // ========================================
+    // 🔄 GAME LOOP
+    // ========================================
+    function gameLoop() {
+        if (!gameActive) {
+            requestAnimationFrame(gameLoop);
+            return;
+        }
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw sky background
+        drawSky();
+        
+        // Spawn new flowers
+        if (!isPaused && Date.now() - lastSpawnTime > spawnInterval) {
+            spawnFlower();
+            lastSpawnTime = Date.now();
+        }
+        
+        // Update and draw flowers
+        if (!isPaused && !winCelebrationActive) {
+            updateFlowers();
+        }
+        
+        // Draw ground
+        drawGround();
+        
+        // Draw basket shadow
+        drawBasketShadow();
+        
+        // Update basket position
+        basketElement.style.left = `${basket.x}px`;
+        
+        // Continue game loop
+        requestAnimationFrame(gameLoop);
+    }
+    
+    // ========================================
+    // 🎨 DRAWING FUNCTIONS
+    // ========================================
+    function drawSky() {
+        // Sky background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#87CEEB');
+        gradient.addColorStop(0.6, '#B0E0E6');
+        gradient.addColorStop(1, '#E0F7FA');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Sun
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(canvas.width - 100, 100, 60, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Sun rays
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 4;
+        for (let i = 0; i < 12; i++) {
+            const angle = i * Math.PI / 6;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 100 + Math.cos(angle) * 65, 100 + Math.sin(angle) * 65);
+            ctx.lineTo(canvas.width - 100 + Math.cos(angle) * 90, 100 + Math.sin(angle) * 90);
+            ctx.stroke();
+        }
+        
+        // Clouds
+        drawCloud(100, 80, 35);
+        drawCloud(300, 120, 40);
+        drawCloud(500, 90, 30);
+        drawCloud(700, 140, 45);
+        drawCloud(200, 60, 28);
+        drawCloud(600, 100, 32);
+    }
+    
+    function drawCloud(x, y, radius) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.arc(x + radius * 1.2, y - radius * 0.5, radius * 0.9, 0, Math.PI * 2);
+        ctx.arc(x + radius * 2.2, y, radius * 1.1, 0, Math.PI * 2);
+        ctx.arc(x + radius * 1.5, y + radius * 0.5, radius * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    function drawGround() {
+        // Draw grass
+        ctx.fillStyle = '#7CFC00';
+        ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+        
+        // Draw grass details
+        ctx.fillStyle = '#4CAF50';
+        for (let i = 0; i < canvas.width; i += 15) {
+            ctx.beginPath();
+            ctx.moveTo(i, canvas.height - 40);
+            ctx.lineTo(i + 7, canvas.height - 55);
+            ctx.lineTo(i + 14, canvas.height - 40);
+            ctx.fill();
+        }
+        
+        // Draw flowers on ground
+        ctx.fillStyle = '#FF69B4';
+        for (let i = 20; i < canvas.width; i += 30) {
+            ctx.beginPath();
+            ctx.arc(i, canvas.height - 45, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Draw more colorful flowers
+        ctx.fillStyle = '#FFD700';
+        for (let i = 40; i < canvas.width; i += 40) {
+            ctx.beginPath();
+            ctx.arc(i, canvas.height - 35, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        ctx.fillStyle = '#00BFFF';
+        for (let i = 60; i < canvas.width; i += 50) {
+            ctx.beginPath();
+            ctx.arc(i, canvas.height - 40, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    function drawBasketShadow() {
+        // Draw basket shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.ellipse(basket.x, canvas.height - 20, basket.width * 0.45, basket.height * 0.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    // ========================================
+    // 🌸 FLOWER FUNCTIONS
+    // ========================================
+    function spawnFlower() {
+        if (isPaused || winCelebrationActive) return;
+        
+        const flowerType = Math.floor(Math.random() * flowerEmojis.length);
+        const flowerSize = 55 + Math.random() * 25;
+        
+        flowers.push({
+            x: Math.random() * (canvas.width - flowerSize) + flowerSize/2,
+            y: -flowerSize,
+            size: flowerSize,
+            speed: flowerSpeed,
+            type: flowerType,
+            emoji: flowerEmojis[flowerType],
+            image: flowerImages[flowerType], // Use loaded image or null
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.08
+        });
+    }
+    
+    function updateFlowers() {
+        for (let i = flowers.length - 1; i >= 0; i--) {
+            const flower = flowers[i];
+            
+            // Update position
+            flower.y += flower.speed;
+            flower.rotation += flower.rotationSpeed;
+            
+            // Draw flower
+            drawFlower(flower);
+            
+            // Check if caught by basket
+            if (
+                flower.y + flower.size/2 > canvas.height - basket.height - 40 &&
+                flower.x > basket.x - basket.width/2 &&
+                flower.x < basket.x + basket.width/2
+            ) {
+                // Caught!
+                score++;
+                updateScoreDisplay();
+                flowers.splice(i, 1);
+                
+                // Check if we need to show a quiz (every 5 points, up to 45)
+                if (score % 5 === 0 && score <= 45 && !isPaused) {
+                    showQuiz();
+                }
+                
+                // Check for win condition (50 points)
+                if (score >= 50) {
+                    winGame();
+                }
+                
+                continue;
+            }
+            
+            // Check if missed and hits the ground
+            if (flower.y - flower.size/2 > canvas.height - 40) {
+                // Create ground hit effect
+                createGroundHitEffect(flower.x, canvas.height - 40);
+                misses++;
+                updateMissesDisplay();
+                flowers.splice(i, 1);
+                
+                // Check game over condition
+                if (misses >= 3) {
+                    gameOver();
+                }
+            }
+        }
+    }
+    
+    function drawFlower(flower) {
+        ctx.save();
+        ctx.translate(flower.x, flower.y);
+        ctx.rotate(flower.rotation);
+        
+        // Draw image if available, otherwise draw emoji
+        if (flower.image && flower.image.complete) {
+            // Draw custom image
+            const size = flower.size;
+            ctx.drawImage(flower.image, -size/2, -size/2, size, size);
+        } else {
+            // Draw emoji with shadow for better visibility
+            ctx.font = `bold ${flower.size}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Black outline/shadow
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 3;
+            ctx.strokeText(flower.emoji, 0, 0);
+            
+            // Main emoji
+            ctx.fillStyle = 'white';
+            ctx.fillText(flower.emoji, 0, 0);
+        }
+        
+        ctx.restore();
+    }
+    
+    // ========================================
+    // 💥 GROUND HIT EFFECT - EXPLOSION ONLY
+    // ========================================
+    function createGroundHitEffect(x, y) {
+        // Create visual explosion effect on the ground
+        const explosion = document.createElement('div');
+        explosion.className = 'ground-hit';
+        explosion.innerHTML = '💥';
+        explosion.style.left = `${x - 25}px`;
+        explosion.style.top = `${y - 25}px`;
+        explosion.style.position = 'absolute';
+        gameContainer.appendChild(explosion);
+        
+        // Remove after animation
+        setTimeout(() => {
+            if (explosion.parentNode) {
+                explosion.parentNode.removeChild(explosion);
+            }
+        }, 800);
+    }
+    
+    // ========================================
+    // 📊 DISPLAY FUNCTIONS
+    // ========================================
+    function updateScoreDisplay() {
+        scoreDisplay.textContent = score;
+        updateNextQuizDisplay();
+    }
+    
+    function updateMissesDisplay() {
+        missesDisplay.textContent = `${misses} / 3`;
+    }
+    
+    function updateNextQuizDisplay() {
+        const nextQuiz = 5 - (score % 5);
+        nextQuizDisplay.textContent = nextQuiz === 0 ? "5" : nextQuiz;
+    }
+    
+    // ========================================
+    // 📚 QUIZ FUNCTIONS
+    // ========================================
+    function showQuiz() {
+        if (isPaused) return;
+        
+        isPaused = true;
+        quizModal.style.display = 'flex';
+        
+        // Get current quiz (cycle through if more than 20)
+        const quiz = quizzes[currentQuizIndex % quizzes.length];
+        currentQuizIndex++;
+        
+        // Set question and options
+        quizQuestionElement.textContent = quiz.question;
+        optionButtons[0].textContent = quiz.options[0];
+        optionButtons[1].textContent = quiz.options[1];
+        optionButtons[0].className = 'quiz-option';
+        optionButtons[1].className = 'quiz-option';
+        
+        // Store correct answer for validation
+        quizModal.dataset.correctAnswer = quiz.correctAnswer;
+    }
+    
+    function handleQuizAnswer(selectedIndex) {
+        const selectedOption = optionButtons[selectedIndex].textContent;
+        const correctAnswer = quizModal.dataset.correctAnswer;
+        
+        // Show visual feedback
+        if (selectedOption === correctAnswer) {
+            optionButtons[selectedIndex].classList.add('correct');
+            // Continue game with same score
+        } else {
+            optionButtons[selectedIndex].classList.add('wrong');
+            // Deduct 5 points, but don't go below 0
+            score = Math.max(0, score - 5);
+            updateScoreDisplay();
+        }
+        
+        // Disable buttons temporarily
+        optionButtons.forEach(button => {
+            button.disabled = true;
+        });
+        
+        // Resume game after a short delay
+        setTimeout(() => {
+            isPaused = false;
+            quizModal.style.display = 'none';
+            optionButtons.forEach(button => {
+                button.disabled = false;
+                button.className = 'quiz-option';
+            });
+        }, 1500);
+    }
+    
+    // ========================================
+    // 🎉 WIN & GAME OVER
+    // ========================================
+    function winGame() {
+        gameActive = false;
+        winCelebrationActive = true;
+        winModal.style.display = 'flex';
+        
+        // Create fireworks
+        createFireworks();
+    }
+    
+    function createFireworks() {
+        // Clear previous fireworks
+        fireworksContainer.innerHTML = '';
+        
+        // Create multiple fireworks
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                
+                // Random position
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                
+                // Random color
+                const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#FFC0CB', '#FFFFFF', '#FF69B4'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Random explosion direction
+                const tx = (Math.random() - 0.5) * 250;
+                const ty = (Math.random() - 0.5) * 250;
+                
+                firework.style.left = `${left}%`;
+                firework.style.top = `${top}%`;
+                firework.style.backgroundColor = color;
+                firework.style.boxShadow = `0 0 20px 8px ${color}`;
+                firework.style.setProperty('--tx', `${tx}px`);
+                firework.style.setProperty('--ty', `${ty}px`);
+                
+                fireworksContainer.appendChild(firework);
+                
+                // Remove firework after animation
+                setTimeout(() => {
+                    firework.remove();
+                }, 1700);
+            }, i * 250);
+        }
+        
+        // Continue fireworks loop
+        setTimeout(createFireworks, 3500);
+    }
+    
+    function gameOver() {
+        gameActive = false;
+        gameOverModal.style.display = 'flex';
+    }
+    
+    function restartGame() {
+        // Reset basket position
+        basket.x = canvas.width / 2;
+        basketElement.style.left = `${basket.x}px`;
+        
+        // Reset game variables
+        // No changes to flower speed or spawn interval
+        
+        // Hide modals
+        winModal.style.display = 'none';
+        gameOverModal.style.display = 'none';
+        
+        // Show instructions screen
+        instructionsScreen.classList.add('active');
+        gameScreen.classList.remove('active');
+    }
+</script>
+</body>
+</html>
